@@ -1,0 +1,241 @@
+---
+title: "Statistical Concepts"
+author: "Lovette"
+date: "2/5/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Loading Required Library
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+Reading the dataset to R
+```{r}
+setwd("C:/Users/u/Documents/NLP work")
+stroke_data <- read_csv("healthcare-dataset-stroke-data.csv")
+```
+
+Exploring the dataset
+```{r}
+glimpse(stroke_data)
+```
+
+```{r}
+str(stroke_data)
+```
+
+Droping the 'id' column
+```{r}
+
+stroke_data <- stroke_data %>%
+  select(-c(id))
+
+```
+
+
+Converting datatypes
+```{r}
+#character to factor
+stroke_data[sapply(stroke_data, is.character)] <- lapply(stroke_data[sapply(stroke_data,
+                                              is.character)], as.factor)
+stroke_data$bmi <- as.numeric(as.character(stroke_data$bmi))
+stroke_data$hypertension <- as.factor(stroke_data$hypertension)
+stroke_data$heart_disease <- as.factor(stroke_data$heart_disease)
+stroke_data$stroke <- as.factor(stroke_data$stroke)
+
+
+```
+
+```{r}
+glimpse(stroke_data)
+```
+
+```{r}
+str(stroke_data)
+```
+
+
+Checking for missing values
+```{r}
+colSums(is.na(stroke_data))
+```
+
+Removing missing values
+```{r}
+stroke_data <- stroke_data %>% na.omit()
+```
+
+
+
+Statistical summaries of dataset
+
+```{r}
+summary(stroke_data)
+```
+
+
+Exploring the distribution of the data set
+
+```{r}
+
+pass <- ggplot(stroke_data, aes(x=age)) + 
+  geom_density()
+
+# Add mean line
+pass+ geom_vline(aes(xintercept=mean(age)),
+            color="blue", linetype="dashed", size=1)
+```
+
+```{r}
+
+pass <- ggplot(stroke_data, aes(x=avg_glucose_level)) + 
+  geom_density()
+
+# Add mean line
+pass+ geom_vline(aes(xintercept=mean(avg_glucose_level)),
+            color="blue", linetype="dashed", size=1)
+```
+The 'age' feature though slightly skewed can be assumed to have a normal distribution however, the 'avg_glucose_level' feature is left skewed.
+
+
+
+Logistic Regression
+
+Logistic regression is being used here because 'stroke' is encoded in binary format as it has on only 2 'factor' levels.
+
+```{r}
+lr_age1 <- glm(stroke ~ age, data = stroke_data, family=binomial)
+summary(lr_age1)
+```
+The age is very significantly in predicting stroke and the difference between Null deviance and Residual deviance is reasonable telling us that the model is a good fit. 
+
+
+
+```{r}
+lr_bmi <- glm(stroke ~ bmi, data = stroke_data, family=binomial)
+summary(lr_bmi)
+```
+The 'bmi' has a low significance in predicting 'stroke' and the difference between Null deviance and Residual deviance is also very small which signifies that this model is not a good fit.
+
+
+```{r}
+lr_gl <- glm(stroke ~ avg_glucose_level, data = stroke_data, family=binomial)
+summary(lr_gl)
+```
+The 'avg_glucose_level' has a significance in predicting 'stroke' however, the difference between Null deviance and Residual deviance is low which signifies that this model is not a good fit.
+
+
+
+Chi Squared Test
+Chi Squraed test is being used as 'stroke' feature is categorical.
+
+Reducing the data to frequencies for the categorical variables
+```{r}
+stroke_data_ct <- stroke_data %>% count(stroke, hypertension, sort = TRUE)
+stroke_data_ct
+```
+
+
+Null hypothesis: independence ie having stroke is independent of the having 'hypertension' of the car.
+
+Creating the matrix
+```{r}
+stroke_ct <- matrix(c(4309, 391, 149, 60), byrow = 2, nrow = 2, ncol = 2)
+```
+
+Applying the Chi test
+```{r}
+chisq.test(stroke_ct)
+```
+The p-value here is low (p-value < 0.05) therefore, we reject null hypothesis.
+
+
+Chi Squared Test
+Chi Squraed test is being used as 'stroke' feature is categorical.
+
+Reducing the data to frequencies for the categorical variables
+```{r}
+stroke_data_ct <- stroke_data %>% count(stroke, heart_disease, sort = TRUE)
+stroke_data_ct
+```
+
+
+Null hypothesis: independence ie having stroke is independent of the having 'heart_disease' of the car.
+
+Creating the matrix
+```{r}
+stroke_ct <- matrix(c(4497, 203, 169, 40), byrow = 2, nrow = 2, ncol = 2)
+```
+
+Applying the Chi test
+```{r}
+chisq.test(stroke_ct)
+```
+The p-value here is low (p-value < 0.05) therefore, we reject null hypothesis.
+
+
+
+
+T-test
+Null Hypothesis: Mean is equal to 42.87
+
+```{r}
+t.test(stroke_data$age, mu = 42.87)
+```
+Since the p-value is greater than 0.05 we cannot reject the null hypothesis 
+
+
+Analysis of Variance (ANOVA)
+
+Null Hypothesis: There is no difference in average 'age' of the different 'smoking_status' categories.
+
+One way ANOVA
+```{r}
+age_ss <- aov(age ~ smoking_status, data = stroke_data)
+summary(age_ss)
+```
+Here we can obviously reject the null hypothesis as the p-value is very low.
+
+Two way ANOVA
+```{r}
+age_hh <- aov(age ~ hypertension + heart_disease, data = stroke_data)
+summary(age_hh)
+```
+
+
+
+
+
+
+Speraman's Correlation Test
+
+Null Hypothesis: There is some correlation between 'avg_glucose_level' and the 'bmi'
+
+```{r}
+cor.test(stroke_data$avg_glucose_level, stroke_data$bmi, method = 'spearman', exact = FALSE)
+```
+From the correlation value of 0.1143, we can say that there is a positive correlation however, it is not a very strong correlation.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
