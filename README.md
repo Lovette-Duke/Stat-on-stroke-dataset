@@ -1,13 +1,12 @@
 
-Sure, here's how you can structure a README based on the R script you provided:
-
-Statistical Concepts Analysis
+Statistical Concepts Analysis:
 This repository contains R code for conducting statistical analysis on a healthcare dataset related to strokes. The analysis covers various statistical tests and models to explore relationships between different features and the occurrence of strokes.
 
-Dataset
+Dataset:
 The dataset used in this analysis is sourced from healthcare-dataset-stroke-data.csv.
 
-Setup
+Setup:
+
 Libraries: The necessary libraries for the analysis are loaded, including tidyverse and ggplot2.
 Data Loading: The dataset is read into R for further analysis.
 Data Preprocessing
